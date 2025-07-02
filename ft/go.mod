@@ -1,4 +1,4 @@
-module github.com/watchman1989/utils/cron
+module github.com/watchman1989/utils/ft
 
 go 1.23.4
 
