@@ -16,7 +16,7 @@ const (
 			<rollingfile formatid="rolllog" type="size" filename="SERVER_NAME.log" maxsize="10485760" maxrolls="5" />
 		</outputs>
 		<formats>
-			<format id="rolllog" format="%Date %Time [%LEVEL] [%Func] [%File.%Line] %Msg%n"/>
+			<format id="rolllog" format="%Date %Time [%LEVEL] [%File.%Line] %Msg%n"/>
 		</formats>
 	</seelog>`
 
