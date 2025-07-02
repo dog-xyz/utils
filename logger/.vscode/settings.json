@@ -1,0 +1,9 @@
+{
+    "go.useLanguageServer": true,
+    "go.toolsEnvVars": {
+      "GO111MODULE": "on"
+    },
+    "gopls": {
+      "build.experimentalWorkspaceModule": true
+    }
+  }
