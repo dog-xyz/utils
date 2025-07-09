@@ -1,4 +1,4 @@
-module github.com/watchman1989/utils/logger
+module github.com/dog-xyz/utils/logger
 
 go 1.23.4
 

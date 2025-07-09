@@ -1,4 +1,4 @@
-module github.com/watchman1989/utils/ft
+module github.com/dog-xyz/utils/ft
 
 go 1.23.4
 
