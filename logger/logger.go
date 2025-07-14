@@ -13,7 +13,7 @@ import (
 const (
 	defaultLoggerConfig = `<seelog type="asynctimer" asyncinterval="5000000" minlevel="debug" maxlevel="error">
 		<outputs formatid="rolllog">
-			<rollingfile formatid="rolllog" type="size" filename="SERVER_NAME.log" maxsize="10485760" maxrolls="5" />
+			<rollingfile formatid="rolllog" type="size" filename="/tmp/SERVER_NAME.log" maxsize="10485760" maxrolls="5" />
 		</outputs>
 		<formats>
 			<format id="rolllog" format="%Date %Time [%LEVEL] [%File.%Line] %Msg%n"/>
