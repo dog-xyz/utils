@@ -4,8 +4,8 @@ import "testing"
 
 
 func TestLogger(t *testing.T) {
-	logger := NewGCLogger("test")
-	logger.Debugf("test debug")
-	logger.Infof("test info")
-	logger.Errorf("test error")
+	logger := NewGCLogger("test", "test", nil)
+	logger.Debugf("test", "test debug")
+	logger.Infof("test", "test info")
+	logger.Errorf("test", "test error")
 }
