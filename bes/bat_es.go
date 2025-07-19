@@ -24,6 +24,7 @@ type BesArgs struct {
 	BatchSize    int
 	SubmitInterval time.Duration
 	Snowflake *Snowflake
+	Callback ErrorCallback
 }
 
 type IndexData struct {
@@ -41,6 +42,7 @@ type BatES struct {
 	retry        int
 	DataMap      map[string]IndexData
 	Snowflake *Snowflake
+	Callback ErrorCallback
 }
 
 type EsData struct {
@@ -92,7 +94,9 @@ func NewBatES(p BesArgs) *BatES {
 		retry:        p.Retry,
 		DataMap:      make(map[string]IndexData),
 		Snowflake: p.Snowflake,
+		Callback: p.Callback,
 	}
+	go es.Run(es.Callback)
 	return es
 }
 
