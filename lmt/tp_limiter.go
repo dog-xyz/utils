@@ -10,6 +10,7 @@ import (
 const (
 	tokenListKey = "TP_LIMITER_TOKEN_LIST:%s"
 	genTokenLock = "TP_LIMITER_GEN_TOKEN_LOCK:%s:%d"
+	rateKey = "TP_LIMITER_RATE:%s"
 )
 
 type LoggerFunc func(quickId string, format string, args ...interface{})
@@ -32,7 +33,9 @@ func NewTpLimiter(name string, rate float64, capacity int, redis *redis.Client, 
 	if logger == nil {
 		logger = defaultLogger
 	}
-	
+	if rate <= 0 {
+		return nil
+	}
 	tp := &TpLimiter{
 		name: name,
 		capacity: capacity,
@@ -42,7 +45,13 @@ func NewTpLimiter(name string, rate float64, capacity int, redis *redis.Client, 
 		rateChan: make(chan float64, 1),
 		logger: logger,
 	}
+	err := tp.redis.Set(context.Background(), fmt.Sprintf(rateKey, tp.name), rate, 0).Err()
+	if err != nil {
+		tp.logger(fmt.Sprintf("limiter-%s", tp.name), "set rate failed, err: %s", err.Error())
+		return nil
+	}
 	go tp.genToken()
+	go tp.checkRate()
 	return tp
 }
 
@@ -52,16 +61,52 @@ func (tp *TpLimiter) Stop() {
 
 func (tp *TpLimiter) SetRate(newRate float64) {
 	if newRate <= 0 {
+		tp.logger(fmt.Sprintf("limiter-%s", tp.name), "invalid rate: %f", newRate)
 		return
 	}
+
+	// Update rate in Redis
+	err := tp.redis.Set(context.Background(), fmt.Sprintf(rateKey, tp.name), newRate, 0).Err()
+	if err != nil {
+		tp.logger(fmt.Sprintf("limiter-%s", tp.name), "set rate failed, err: %s", err.Error())
+		return
+	}
+
+	// Try to send new rate to channel, if full then drain it first
 	select {
 	case tp.rateChan <- newRate:
+		// Successfully sent
 	default:
-		select {
-		case <-tp.rateChan:
-		default:
+		// Channel is full, drain it and send new rate
+		for len(tp.rateChan) > 0 {
+			<-tp.rateChan
 		}
 		tp.rateChan <- newRate
+	}
+}
+
+func (tp *TpLimiter) checkRate() {
+	t := time.NewTicker(time.Second)
+	defer t.Stop()
+	quickId := fmt.Sprintf("limiter-%s", tp.name)
+	
+	for {
+		select {
+		case <-t.C:
+			rate, err := tp.redis.Get(context.Background(), fmt.Sprintf(rateKey, tp.name)).Float64()
+			if err != nil {
+				if err != redis.Nil {
+					tp.logger(quickId, "get rate failed, err: %s", err.Error())
+				}
+				continue
+			}
+			
+			if rate != tp.rate {
+				tp.SetRate(rate)
+			}
+		case <-tp.done:
+			return
+		}
 	}
 }
 
