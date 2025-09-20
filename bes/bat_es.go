@@ -22,7 +22,7 @@ type BesArgs struct {
 	Retry        int
 	ChannelSize  int
 	BatchSize    int
-	SubmitInterval time.Duration
+	SubmitInterval int64
 	Snowflake *Snowflake
 	Callback ErrorCallback
 }
@@ -38,7 +38,7 @@ type BatES struct {
 	Input chan EsData
 	done chan bool
 	batchSize    int
-	SubmitInterval time.Duration
+	SubmitInterval int64
 	retry        int
 	DataMap      map[string]IndexData
 	Snowflake *Snowflake
